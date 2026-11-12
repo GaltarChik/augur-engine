@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://augur-engine.local/schemas/location.schema.json",
+  "title": "Location",
+  "description": "A match location. Locations are revealed on turns 1 to 3.",
+  "type": "object",
+  "required": ["id", "name", "reveal_turn", "status"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_]+$",
+      "description": "Stable snake_case identifier."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reveal_turn": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 3,
+      "description": "Turn on which the location appears."
+    },
+    "effects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["trigger"],
+        "additionalProperties": false,
+        "properties": {
+          "trigger": {
+            "type": "string",
+            "enum": ["on_reveal", "start_of_turn", "end_of_turn", "on_play", "passive"]
+          },
+          "text": { "type": "string" },
+          "effect": { "type": "object" }
+        }
+      },
+      "default": []
+    },
+    "status": {
+      "type": "string",
+      "enum": ["implemented", "unknown_effect"]
+    },
+    "source": {
+      "type": "string",
+      "description": "Where the location text was taken from. Required when effects are present."
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "effects": { "minItems": 1 } }, "required": ["effects"] },
+      "then": { "required": ["source"] }
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+# Data, matches, trained models (local only)
+data/
+
+# Maven build output
+target/
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Models exported outside data/
+*.onnx
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath

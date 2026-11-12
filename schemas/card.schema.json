@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://augur-engine.local/schemas/card.schema.json",
+  "title": "Card",
+  "description": "A Marvel Snap card. Ability texts must come from the owner or the official game; never invent them.",
+  "type": "object",
+  "required": ["id", "name", "cost", "power", "status"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_]+$",
+      "description": "Stable snake_case identifier, e.g. 'spider_man'."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Display name in English."
+    },
+    "cost": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 12,
+      "description": "Energy cost; equals the turn on which the card can be played at minimum."
+    },
+    "power": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Base power before any ability modifiers."
+    },
+    "archetypes": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+      "uniqueItems": true,
+      "description": "Archetype ids this card typically appears in. Used only as a prior for Stage A."
+    },
+    "abilities": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/ability" },
+      "default": []
+    },
+    "status": {
+      "type": "string",
+      "enum": ["implemented", "unknown_effect"],
+      "description": "'unknown_effect' means the card has abilities that the engine does not model yet. It widens the strength interval."
+    },
+    "source": {
+      "type": "string",
+      "description": "Where the ability text was taken from (owner note, in-game text, date). Required when abilities are present."
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "abilities": { "minItems": 1 } }, "required": ["abilities"] },
+      "then": { "required": ["source"] }
+    }
+  ],
+  "$defs": {
+    "ability": {
+      "type": "object",
+      "required": ["trigger"],
+      "additionalProperties": false,
+      "properties": {
+        "trigger": {
+          "type": "string",
+          "enum": ["on_reveal", "ongoing", "end_of_turn", "on_destroy", "on_discard", "on_move", "on_play", "passive"]
+        },
+        "text": {
+          "type": "string",
+          "description": "Ability text as written by the source. Optional while the effect is being implemented."
+        },
+        "effect": {
+          "type": "object",
+          "description": "Machine-readable effect in the engine DSL. Defined in engine/ at stage 1, step 4."
+        }
+      }
+    }
+  }
+}

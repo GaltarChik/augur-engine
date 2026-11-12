@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://augur-engine.local/schemas/match.schema.json",
+  "title": "Match",
+  "description": "One recorded match: the player's deck, the cards the opponent revealed, and the result. A match is split into 6 turns. Synthetic matches are marked and never used in quality metrics.",
+  "type": "object",
+  "required": ["match_id", "date", "patch", "synthetic", "locations", "player_deck", "turns", "result"],
+  "additionalProperties": false,
+  "properties": {
+    "match_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Unique id, e.g. '2026-11-12-001'."
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date the match was played (ISO 8601)."
+    },
+    "patch": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Game version the match was played on. Data from different patches is not mixed silently."
+    },
+    "synthetic": {
+      "type": "boolean",
+      "description": "true for generated data. Such matches are excluded from quality metrics."
+    },
+    "player_deck": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+      "minItems": 12,
+      "maxItems": 12,
+      "description": "The 12 card ids in the player's deck."
+    },
+    "locations": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+      "minItems": 3,
+      "maxItems": 3,
+      "description": "The 3 location ids of this match, in reveal order."
+    },
+    "turns": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": { "$ref": "#/$defs/turn" }
+    },
+    "result": {
+      "type": "object",
+      "required": ["outcome", "locations_won"],
+      "additionalProperties": false,
+      "properties": {
+        "outcome": { "type": "string", "enum": ["win", "loss"] },
+        "locations_won": {
+          "type": "object",
+          "required": ["player", "opponent"],
+          "additionalProperties": false,
+          "properties": {
+            "player": { "type": "integer", "minimum": 0, "maximum": 3 },
+            "opponent": { "type": "integer", "minimum": 0, "maximum": 3 }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "turn": {
+      "type": "object",
+      "required": ["turn", "plays"],
+      "additionalProperties": false,
+      "properties": {
+        "turn": { "type": "integer", "minimum": 1, "maximum": 6 },
+        "plays": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/play" },
+          "default": []
+        }
+      }
+    },
+    "play": {
+      "type": "object",
+      "required": ["side", "card_id", "location_id"],
+      "additionalProperties": false,
+      "properties": {
+        "side": { "type": "string", "enum": ["player", "opponent"] },
+        "card_id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+        "location_id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+        "power_after_reveal": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Card power observed after the turn resolved. Optional; used to check the engine."
+        }
+      }
+    }
+  }
+}

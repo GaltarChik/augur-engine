@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://augur-engine.local/schemas/archetype.schema.json",
+  "title": "Archetype",
+  "description": "A deck archetype. The list lives in config/archetypes.yaml and is extensible. The 'other' archetype is mandatory and checked by a test.",
+  "type": "object",
+  "required": ["id", "name"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_]+$",
+      "description": "Stable snake_case identifier, e.g. 'destroy'."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "description": {
+      "type": "string",
+      "description": "Short community-style description of the archetype."
+    },
+    "key_cards": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+      "uniqueItems": true,
+      "default": [],
+      "description": "Card ids that define the archetype. Informational; not used in the model."
+    }
+  }
+}
